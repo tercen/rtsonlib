@@ -19,7 +19,7 @@ pub fn to_json(object: SEXP) -> RResult<String> {
 
 
 pub fn from_json(data: &str) -> RResult<SEXP> {
-    match decode_json(data.to_string().as_bytes()) {
+    match decode_json(data.as_bytes()) {
         Ok(object) => value_to_r(&object),
         Err(ref e) => Err(RError::unknown(e.clone())),
     }
