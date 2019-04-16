@@ -1,13 +1,29 @@
 extern crate rustr;
 extern crate rustson;
-extern crate indexmap;
 
 pub use rustr::*;
 pub use rustson::*;
 
 use std::io::Cursor;
-use indexmap::IndexMap;
+use std::collections::HashMap;
 use ::std::ffi::*;
+
+
+pub fn to_json(object: SEXP) -> RResult<String> {
+    let value = r_to_value(object)?;
+    match encode_json(&value) {
+        Ok(v) => Ok(v),
+        Err(ref e) => Err(RError::unknown(e.clone())),
+    }
+}
+
+
+pub fn from_json(data: &str) -> RResult<SEXP> {
+    match decode_json(data.to_string().as_bytes()) {
+        Ok(object) => value_to_r(&object),
+        Err(ref e) => Err(RError::unknown(e.clone())),
+    }
+}
 
 pub fn to_tson(object: SEXP) -> RResult<RawVec> {
     let value = r_to_value(object)?;
@@ -154,7 +170,7 @@ fn r_to_value(object: SEXP) -> RResult<Value> {
             let names: CharVec = RName::name(&rlist);
 
             if names.rsize() > 0 || inherits(object, "tsonmap")? {
-                let mut map = IndexMap::with_capacity(names.rsize() as usize);
+                let mut map = HashMap::with_capacity(names.rsize() as usize);
                 let mut index = 0;
 
                 for x in rlist {
@@ -205,10 +221,9 @@ fn value_to_r(value: &Value) -> RResult<SEXP> {
                         i += 1;
                     }
                     Err(e) => {
-                        return Err(RError::unknown(format!("value_to_r : {}", e).to_string()))
+                        return Err(RError::unknown(format!("value_to_r : {}", e).to_string()));
                     }
                 }
-
             }
             lst.intor()
         }
@@ -224,7 +239,7 @@ fn value_to_r(value: &Value) -> RResult<SEXP> {
                         i += 1;
                     }
                     Err(e) => {
-                        return Err(RError::unknown(format!("value_to_r : {}", e).to_string()))
+                        return Err(RError::unknown(format!("value_to_r : {}", e).to_string()));
                     }
                 }
             }
