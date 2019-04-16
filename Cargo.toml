@@ -1,0 +1,12 @@
+[package]
+name = "git remote add origin https://github.com/tercen/rtsonlib.git"
+version = "0.1.0"
+
+[dependencies]
+rustr = "*"
+indexmap = "*"
+rustson = { git = "https://github.com/tercen/rustson", tag = "0.1.0" }
+
+[lib]
+name = "rtsonlib"
+crate-type = ["staticlib","rlib"]
