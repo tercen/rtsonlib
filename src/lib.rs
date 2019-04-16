@@ -71,7 +71,7 @@ fn inherits(object: SEXP, clazz: &str) -> RResult<bool> {
     }
 }
 
-fn r_to_value(object: SEXP) -> RResult<Value> {
+pub fn r_to_value(object: SEXP) -> RResult<Value> {
     match object.rtype() {
         NILSXP => Ok(Value::NULL),
         REALSXP => {
@@ -204,7 +204,7 @@ fn r_to_value(object: SEXP) -> RResult<Value> {
     }
 }
 
-fn value_to_r(value: &Value) -> RResult<SEXP> {
+pub fn value_to_r(value: &Value) -> RResult<SEXP> {
     match *value {
         Value::NULL => ().intor(),
         Value::STR(ref v) => v.intor(),
