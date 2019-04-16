@@ -1,5 +1,5 @@
 [package]
-name = "git remote add origin https://github.com/tercen/rtsonlib.git"
+name = "rtsonlib"
 version = "0.1.0"
 
 [dependencies]
