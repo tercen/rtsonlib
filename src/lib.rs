@@ -74,6 +74,14 @@ fn inherits(object: SEXP, clazz: &str) -> RResult<bool> {
 pub fn r_to_value(object: SEXP) -> RResult<Value> {
     match object.rtype() {
         NILSXP => Ok(Value::NULL),
+        RAWSXP => {
+            let object_ = RawVec::rnew(object)?;
+            let mut _vec = Vec::<u8>::with_capacity(object_.rsize() as usize);
+            for x in object_ {
+                _vec.push(x);
+            }
+            Ok(Value::LSTU8(_vec))
+        }
         REALSXP => {
             let object_ = Vec::<f64>::rnew(object)?;
             if inherits(object, "scalar")? {
