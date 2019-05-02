@@ -7,8 +7,20 @@ pub struct RSerializer {}
 impl RSerializer {
     pub fn new() -> RSerializer {RSerializer{}}
 
+    pub fn encoded_size(&self, value: &SEXP) -> RResult<usize> {
+        let mut buf = CountWriter::new();
+        self.add_string(&mut buf, VERSION);
+
+        match self.add_object(value, &mut buf) {
+            Ok(_) => Ok(buf.size),
+            Err(e) => Err(e),
+        }
+    }
+
     pub fn encode(&self, value: &SEXP) -> RResult<RawVec> {
-        let mut buf = Vec::new();
+        let size = self.encoded_size(value)?;
+
+        let mut buf = Vec::with_capacity(size);
         self.add_string(&mut buf, VERSION);
 
         match self.add_object(value, &mut buf) {

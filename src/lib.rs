@@ -30,22 +30,23 @@ pub fn from_json(data: &str) -> RResult<SEXP> {
 
 pub fn to_tson(object: SEXP) -> RResult<RawVec> {
     let ser = RSerializer::new();
+    ser.encode(&object)
 
-    let value = r_to_value(object)?;
-    match encode(&value) {
-        Ok(buf) => {
-            let mut raw_vec = RawVec::alloc(buf.len());
-
-            unsafe {
-                for i in 0..buf.len() {
-                    raw_vec.uset(i, buf[i]);
-                }
-            }
-
-            return Ok(raw_vec);
-        }
-        Err(ref e) => Err(RError::unknown(e.clone())),
-    }
+//    let value = r_to_value(object)?;
+//    match encode(&value) {
+//        Ok(buf) => {
+//            let mut raw_vec = RawVec::alloc(buf.len());
+//
+//            unsafe {
+//                for i in 0..buf.len() {
+//                    raw_vec.uset(i, buf[i]);
+//                }
+//            }
+//
+//            return Ok(raw_vec);
+//        }
+//        Err(ref e) => Err(RError::unknown(e.clone())),
+//    }
 }
 
 pub fn from_tson(rbytes: RawVec) -> RResult<SEXP> {
