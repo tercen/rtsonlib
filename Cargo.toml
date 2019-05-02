@@ -1,11 +1,11 @@
 [package]
 name = "rtsonlib"
-version = "0.2.6"
+version = "0.2.7"
 
 [dependencies]
 rustr = "*"
-#rustson = { git = "https://github.com/tercen/rustson", tag = "0.2.5" }
-rustson = { path = "../rustson" }
+rustson = { git = "https://github.com/tercen/rustson", tag = "0.2.7" }
+#rustson = { path = "../rustson" }
 
 [lib]
 name = "rtsonlib"
