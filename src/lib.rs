@@ -1,13 +1,16 @@
 extern crate rustr;
 extern crate rustson;
 
-pub use rustr::*;
-pub use rustson::*;
+use rustr::*;
+use rustson::*;
 
 use std::io::Cursor;
 use std::collections::HashMap;
 use ::std::ffi::*;
 
+pub mod ser;
+
+use ser::RSerializer;
 
 pub fn to_json(object: SEXP) -> RResult<String> {
     let value = r_to_value(object)?;
@@ -26,6 +29,8 @@ pub fn from_json(data: &str) -> RResult<SEXP> {
 }
 
 pub fn to_tson(object: SEXP) -> RResult<RawVec> {
+    let ser = RSerializer::new();
+
     let value = r_to_value(object)?;
     match encode(&value) {
         Ok(buf) => {
