@@ -1,6 +1,10 @@
 extern crate rustr;
 extern crate rustson;
 
+use std::error;
+use std::fmt;
+use std::convert::From;
+
 use rustr::*;
 use rustson::*;
 
@@ -9,64 +13,133 @@ use std::collections::HashMap;
 use ::std::ffi::*;
 
 pub mod ser;
+pub mod deser;
 
+
+use deser::RTsonDeserializer;
 use ser::RSerializer;
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct RTsonError {
+    description: String
+}
+
+impl RTsonError {
+    pub fn new<T: Into<String>>(description: T) -> RTsonError {
+        RTsonError { description: description.into() }
+    }
+}
+
+impl fmt::Display for RTsonError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", &self.description)
+    }
+}
+
+impl error::Error for RTsonError {
+    fn description(&self) -> &str {
+        &self.description
+    }
+
+    fn cause(&self) -> Option<&error::Error> {
+        None
+    }
+
+    fn source(&self) -> Option<&(error::Error + 'static)> { None }
+}
+
+type RTsonResult<T> = std::result::Result<T, RTsonError>;
+
+impl From<RTsonError> for RError {
+    fn from(e: RTsonError) -> Self {
+        RError::unknown(e.to_string())
+    }
+}
+
+impl From<rustson::TsonError> for RTsonError {
+    fn from(e: TsonError) -> Self {
+        RTsonError::new(e.to_string())
+    }
+}
+
+impl From<RError> for RTsonError {
+    fn from(e: RError) -> Self {
+        RTsonError::new(e.to_string())
+    }
+}
+
+
+#[inline]
+pub fn http_raise<T, E>(msg: E) -> RTsonResult<T>
+    where E: Into<String> {
+    Err(RTsonError::new(msg))
+}
 
 pub fn to_json(object: SEXP) -> RResult<String> {
     let value = r_to_value(object)?;
     match encode_json(&value) {
         Ok(v) => Ok(v),
-        Err(ref e) => Err(RError::unknown(e.clone())),
+        Err(e) => Err(RError::other(e)),
     }
 }
-
 
 pub fn from_json(data: &str) -> RResult<SEXP> {
     match decode_json(data.as_bytes()) {
         Ok(object) => value_to_r(&object),
-        Err(ref e) => Err(RError::unknown(e.clone())),
+        Err(e) => Err(RError::other(e)),
     }
 }
 
 pub fn to_tson(object: SEXP) -> RResult<RawVec> {
     let ser = RSerializer::new();
-    ser.encode(&object)
-
-//    let value = r_to_value(object)?;
-//    match encode(&value) {
-//        Ok(buf) => {
-//            let mut raw_vec = RawVec::alloc(buf.len());
-//
-//            unsafe {
-//                for i in 0..buf.len() {
-//                    raw_vec.uset(i, buf[i]);
-//                }
-//            }
-//
-//            return Ok(raw_vec);
-//        }
-//        Err(ref e) => Err(RError::unknown(e.clone())),
-//    }
+    Ok(ser.encode(&object)?)
 }
 
 pub fn from_tson(rbytes: RawVec) -> RResult<SEXP> {
-    let mut bytes: Vec<u8> = Vec::new();
+    let len = rbytes.rsize() as usize;
 
-    for b in rbytes.into_iter() {
-        bytes.push(b);
-    }
+    unsafe {
+        let rptr = RAW(rbytes.s());
+        let bytes: Vec<u8> = Vec::from_raw_parts(rptr, len, len);
+        let deser = RTsonDeserializer::new();
 
-    match decode(Cursor::new(&bytes)) {
-        Ok(ref object) => value_to_r(object),
-        Err(ref e) => Err(RError::unknown(e.clone())),
+        let result;
+
+        {
+            let mut reader = Cursor::new(&bytes);
+            match deser.read(&mut reader) {
+                Ok(v) => {
+                    result = Ok(v);
+                }
+                Err(e) => {
+                    result = Err(RError::other(e));
+                }
+            }
+        }
+
+        std::mem::forget(bytes);
+        result
     }
 }
+
+pub fn from_tson_reader(reader: &mut Cursor<&[u8]>) -> RResult<SEXP> {
+
+
+    let deser = RTsonDeserializer::new();
+     Ok(deser.read(reader)?)
+
+//    match decode(Cursor::new(&bytes)) {
+//        Ok(ref object) => value_to_r(object),
+//        Err(  e) => Err(RError::other(e)),
+//    }
+}
+
 
 pub fn c_str(x: &str) -> RResult<CString> {
     match CString::new(x) {
         Ok(some) => Ok(some),
-        Err(err) => {
-            Err(RError::unknown(format!("c_str : failed with {}", err).to_string()))
+        Err(e) => {
+            Err(RError::other(e))
         }
     }
 }
