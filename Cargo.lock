@@ -388,6 +388,7 @@ dependencies = [
 name = "rtsonlib"
 version = "0.2.10"
 dependencies = [
+ "bytes 0.4.12 (registry+https://github.com/rust-lang/crates.io-index)",
  "rustr 0.1.9 (registry+https://github.com/rust-lang/crates.io-index)",
  "rustson 0.2.10 (git+https://github.com/tercen/rustson?tag=0.2.10)",
 ]
