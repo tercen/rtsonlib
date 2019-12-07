@@ -40,12 +40,12 @@ impl RSerializer {
         }
     }
 
-    pub fn write(&self, value: &SEXP, writer: &mut Writer) -> RTsonResult<()> {
+    pub fn write(&self, value: &SEXP, writer: &mut dyn Writer) -> RTsonResult<()> {
         self.add_string(writer, VERSION)?;
         self.add_object(value, writer)
     }
 
-    fn add_object(&self, object: &SEXP, buf: &mut Writer) -> RTsonResult<()> {
+    fn add_object(&self, object: &SEXP, buf: &mut dyn Writer) -> RTsonResult<()> {
         match object.rtype() {
             NILSXP => {
                 buf.add_u8(NULL_TYPE)?;
@@ -226,7 +226,7 @@ impl RSerializer {
         Ok(())
     }
 
-    fn add_len(&self, buf: &mut Writer, len: usize) -> RTsonResult<()> {
+    fn add_len(&self, buf: &mut dyn Writer, len: usize) -> RTsonResult<()> {
         if len > MAX_LIST_LENGTH {
             return http_raise("list too large");
         }
@@ -234,12 +234,12 @@ impl RSerializer {
         Ok(())
     }
 
-    fn add_string(&self, buf: &mut Writer, value: &str) -> RTsonResult<()> {
+    fn add_string(&self, buf: &mut dyn Writer, value: &str) -> RTsonResult<()> {
         buf.add_u8(STRING_TYPE)?;
         self.add_cstring(buf, value)
     }
 
-    fn add_cstring(&self, buf: &mut Writer, value: &str) -> RTsonResult<()> {
+    fn add_cstring(&self, buf: &mut dyn Writer, value: &str) -> RTsonResult<()> {
         for byte in value.as_bytes().iter() {
             buf.add_u8(*byte)?;
         }

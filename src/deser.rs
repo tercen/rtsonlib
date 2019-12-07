@@ -3,7 +3,7 @@ use super::*;
 pub use rustson::deser::Reader;
 
 pub trait RDeserializer {
-    fn read(&self, reader: &mut Reader) -> RTsonResult<SEXP>;
+    fn read(&self, reader: &mut dyn Reader) -> RTsonResult<SEXP>;
 }
 
 pub struct RTsonDeserializer {}
@@ -12,13 +12,13 @@ pub struct RBinaryDeserializer {}
 pub struct RUTF8Deserializer {}
 
 impl RDeserializer for RTsonDeserializer{
-    fn read(&self, reader: &mut Reader) -> RTsonResult<SEXP>{
+    fn read(&self, reader: &mut dyn Reader) -> RTsonResult<SEXP>{
         RTsonDeserializer::read(self, reader)
     }
 }
 
 impl RDeserializer for RJsonDeserializer {
-    fn read(&self, reader: &mut Reader) -> RTsonResult<SEXP>{
+    fn read(&self, reader: &mut dyn Reader) -> RTsonResult<SEXP>{
         let mut buf = Vec::new();
         reader.read_all(&mut buf)?;
 
@@ -36,7 +36,7 @@ impl RDeserializer for RJsonDeserializer {
 }
 
 impl RDeserializer for RBinaryDeserializer {
-    fn read(&self, reader: &mut Reader) -> RTsonResult<SEXP>{
+    fn read(&self, reader: &mut dyn Reader) -> RTsonResult<SEXP>{
         let mut buf = Vec::new();
         reader.read_all(&mut buf)?;
 
@@ -53,7 +53,7 @@ impl RDeserializer for RBinaryDeserializer {
 }
 
 impl RDeserializer for RUTF8Deserializer {
-    fn read(&self, reader: &mut Reader) -> RTsonResult<SEXP>{
+    fn read(&self, reader: &mut dyn Reader) -> RTsonResult<SEXP>{
         let mut buf = Vec::new();
         reader.read_all(&mut buf)?;
 
@@ -69,7 +69,7 @@ impl RTsonDeserializer {
         RTsonDeserializer {}
     }
 
-    pub fn read(&self, reader: &mut Reader) -> RTsonResult<SEXP> {
+    pub fn read(&self, reader: &mut dyn Reader) -> RTsonResult<SEXP> {
         let itype = self.read_type(reader)?;
 
         if itype != STRING_TYPE {
@@ -85,15 +85,15 @@ impl RTsonDeserializer {
         self.read_object(reader)
     }
 
-    fn read_type(&self, reader: &mut Reader) -> RTsonResult<u8> {
+    fn read_type(&self, reader: &mut dyn Reader) -> RTsonResult<u8> {
         Ok(reader.read_u8()?)
     }
 
-    fn read_len(&self, reader: &mut Reader) -> RTsonResult<usize> {
+    fn read_len(&self, reader: &mut dyn Reader) -> RTsonResult<usize> {
         Ok(reader.read_u32()? as usize)
     }
 
-    fn read_string(&self, reader: &mut Reader) -> RTsonResult<String> {
+    fn read_string(&self, reader: &mut dyn Reader) -> RTsonResult<String> {
         let mut done = false;
         let mut vec = Vec::new();
         while !done {
@@ -112,7 +112,7 @@ impl RTsonDeserializer {
         }
     }
 
-    fn read_object(&self, reader: &mut Reader) -> RTsonResult<SEXP> {
+    fn read_object(&self, reader: &mut dyn Reader) -> RTsonResult<SEXP> {
         let itype = self.read_type(reader)?;
         match itype {
             NULL_TYPE => Ok(().intor()?),

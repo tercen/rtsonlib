@@ -41,11 +41,11 @@ impl error::Error for RTsonError {
         &self.description
     }
 
-    fn cause(&self) -> Option<&error::Error> {
+    fn cause(&self) -> Option<&dyn error::Error> {
         None
     }
 
-    fn source(&self) -> Option<&(error::Error + 'static)> { None }
+    fn source(&self) -> Option<&(dyn error::Error + 'static)> { None }
 }
 
 type RTsonResult<T> = std::result::Result<T, RTsonError>;
