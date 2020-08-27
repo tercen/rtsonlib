@@ -40,6 +40,8 @@ impl RDeserializer for RBinaryDeserializer {
         let mut buf = Vec::new();
         reader.read_all(&mut buf)?;
 
+//        r_printf(&format!("RBinaryDeserializer 2222  buf.len() {}", buf.len()));
+
         let mut raw_vec = RawVec::alloc(buf.len());
 
         unsafe {
