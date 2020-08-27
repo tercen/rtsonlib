@@ -3,7 +3,10 @@ name = "rtsonlib"
 version = "0.2.11"
 
 [dependencies]
-rustr = "0.1"
+#rustr = "0.1"
+rustr = { git = "https://github.com/tercen/rustr", tag = "0.1.11" }
+#rustr = { git = "https://github.com/tercen/rustr" }
+#rustr = { path = "../rustr" }
 rustson = { git = "https://github.com/tercen/rustson", tag = "0.2.11" }
 #rustson = { path = "../rustson" }
 
