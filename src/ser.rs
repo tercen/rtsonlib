@@ -197,19 +197,32 @@ impl RSerializer {
                     }
                 } else {
                     buf.add_u8(LIST_STRING_TYPE)?;
-
                     let mut len_in_bytes = 0;
 
-                    for value in object_ {
+                    for i in 0..len {
+                        let value = object_.at(i).map_err(|e| RError::other(e))?;
                         len_in_bytes += value.as_bytes().len() + 1;
                     }
 
                     self.add_len(buf, len_in_bytes)?;
 
-                    let object_ = CharVec::rnew(*object)?;
-                    for value in object_ {
-                        self.add_cstring2(buf, &value)?;
+                    for i in 0..len {
+                        let value = object_.at(i).map_err(|e| RError::other(e))?;
+                        self.add_cstring(buf, &value)?;
                     }
+
+                    // let mut len_in_bytes = 0;
+                    //
+                    // for value in object_ {
+                    //     len_in_bytes += value.as_bytes().len() + 1;
+                    // }
+                    //
+                    // self.add_len(buf, len_in_bytes)?;
+                    //
+                    // let object_ = CharVec::rnew(*object)?;
+                    // for value in object_ {
+                    //     self.add_cstring2(buf, &value)?;
+                    // }
                 }
             }
             VECSXP => {
@@ -260,18 +273,16 @@ impl RSerializer {
     }
 
     fn add_cstring(&self, buf: &mut dyn Writer, value: &str) -> RTsonResult<()> {
-        for byte in value.as_bytes().iter() {
-            buf.add_u8(*byte)?;
-        }
-        buf.add_u8(0)?;
-        Ok(())
-    }
-
-    fn add_cstring2(&self, buf: &mut dyn Writer, value: &CString) -> RTsonResult<()> {
         buf.put_slice(value.as_bytes())?;
         buf.add_u8(0)?;
         Ok(())
     }
+
+    // fn add_cstring2(&self, buf: &mut dyn Writer, value: &CString) -> RTsonResult<()> {
+    //     buf.put_slice(value.as_bytes())?;
+    //     buf.add_u8(0)?;
+    //     Ok(())
+    // }
 }
 
 
