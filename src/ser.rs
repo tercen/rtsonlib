@@ -87,14 +87,10 @@ impl RSerializer {
                     let len = object_.rsize() as usize;
                     self.add_len(buf, len)?;
                     let len_in_bytes = len * 8;
-                    unsafe {
-                        buf.put_slice(std::slice::from_raw_parts(RAW(object_.s()), len_in_bytes) );
-                    }
 
-                    // self.add_len(buf, object_.rsize() as usize)?;
-                    // for x in object_ {
-                    //     buf.add_f64(x as f64)?;
-                    // }
+                    unsafe {
+                        buf.put_slice(std::slice::from_raw_parts(REAL(object_.s()) as *const u8, len_in_bytes) );
+                    }
                 }
             }
             INTSXP => {
@@ -112,8 +108,9 @@ impl RSerializer {
                         let len = object_.rsize() as usize;
                         self.add_len(buf, len)?;
                         let len_in_bytes = len;
+
                         unsafe {
-                            buf.put_slice(std::slice::from_raw_parts(RAW(object_.s()), len_in_bytes) );
+                            buf.put_slice(std::slice::from_raw_parts(INTEGER(object_.s()) as *const u8, len_in_bytes) );
                         }
                     } else if inherits(*object, "int16")? {
                         buf.add_u8(LIST_INT16_TYPE)?;
@@ -121,7 +118,7 @@ impl RSerializer {
                         self.add_len(buf, len)?;
                         let len_in_bytes = len * 2;
                         unsafe {
-                            buf.put_slice(std::slice::from_raw_parts(RAW(object_.s()), len_in_bytes) );
+                            buf.put_slice(std::slice::from_raw_parts(INTEGER(object_.s()) as *const u8, len_in_bytes) );
                         }
                     } else if inherits(*object, "int64")? {
                         buf.add_u8(LIST_INT64_TYPE)?;
@@ -129,7 +126,7 @@ impl RSerializer {
                         self.add_len(buf, len)?;
                         let len_in_bytes = len * 8;
                         unsafe {
-                            buf.put_slice(std::slice::from_raw_parts(RAW(object_.s()), len_in_bytes) );
+                            buf.put_slice(std::slice::from_raw_parts(INTEGER(object_.s()) as *const u8, len_in_bytes) );
                         }
                     } else if inherits(*object, "uint8")? {
                         buf.add_u8(LIST_UINT8_TYPE)?;
@@ -137,7 +134,7 @@ impl RSerializer {
                         self.add_len(buf, len)?;
                         let len_in_bytes = len  ;
                         unsafe {
-                            buf.put_slice(std::slice::from_raw_parts(RAW(object_.s()), len_in_bytes) );
+                            buf.put_slice(std::slice::from_raw_parts(INTEGER(object_.s()) as *const u8, len_in_bytes) );
                         }
                     } else if inherits(*object, "uint16")? {
                         buf.add_u8(LIST_UINT16_TYPE)?;
@@ -145,7 +142,7 @@ impl RSerializer {
                         self.add_len(buf, len)?;
                         let len_in_bytes = len * 2;
                         unsafe {
-                            buf.put_slice(std::slice::from_raw_parts(RAW(object_.s()), len_in_bytes) );
+                            buf.put_slice(std::slice::from_raw_parts(INTEGER(object_.s()) as *const u8, len_in_bytes) );
                         }
                     } else if inherits(*object, "uint64")? {
                         buf.add_u8(LIST_UINT64_TYPE)?;
@@ -153,7 +150,7 @@ impl RSerializer {
                         self.add_len(buf, len)?;
                         let len_in_bytes = len * 8;
                         unsafe {
-                            buf.put_slice(std::slice::from_raw_parts(RAW(object_.s()), len_in_bytes) );
+                            buf.put_slice(std::slice::from_raw_parts(INTEGER(object_.s()) as *const u8, len_in_bytes) );
                         }
                     } else if inherits(*object, "uint32")? {
                         buf.add_u8(LIST_UINT32_TYPE)?;
@@ -161,7 +158,7 @@ impl RSerializer {
                         self.add_len(buf, len)?;
                         let len_in_bytes = len * 4;
                         unsafe {
-                            buf.put_slice(std::slice::from_raw_parts(RAW(object_.s()), len_in_bytes) );
+                            buf.put_slice(std::slice::from_raw_parts(INTEGER(object_.s()) as *const u8, len_in_bytes) );
                         }
                     } else {
                         buf.add_u8(LIST_INT32_TYPE)?;
@@ -169,7 +166,7 @@ impl RSerializer {
                         self.add_len(buf, len)?;
                         let len_in_bytes = len * 4;
                         unsafe {
-                            buf.put_slice(std::slice::from_raw_parts(RAW(object_.s()), len_in_bytes) );
+                            buf.put_slice(std::slice::from_raw_parts(INTEGER(object_.s()) as *const u8, len_in_bytes) );
                         }
                     }
                 }
