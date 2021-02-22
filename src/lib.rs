@@ -3,7 +3,7 @@ extern crate rustson;
 
 use std::error;
 use std::fmt;
-use std::convert::{From, TryInto};
+use std::convert::{From};
 
 use rustr::*;
 use rustson::*;
