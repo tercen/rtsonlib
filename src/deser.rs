@@ -1,6 +1,7 @@
 use super::*;
 
 pub use rustson::deser::Reader;
+use rustson::spec::STRING_TYPE;
 
 pub trait RDeserializer {
     fn read(&self, reader: &mut dyn Reader) -> RTsonResult<SEXP>;
@@ -39,8 +40,6 @@ impl RDeserializer for RBinaryDeserializer {
     fn read(&self, reader: &mut dyn Reader) -> RTsonResult<SEXP>{
         let mut buf = Vec::new();
         reader.read_all(&mut buf)?;
-
-//        r_printf(&format!("RBinaryDeserializer 2222  buf.len() {}", buf.len()));
 
         let mut raw_vec = RawVec::alloc(buf.len());
 

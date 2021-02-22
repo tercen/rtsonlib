@@ -3,7 +3,7 @@ extern crate rustson;
 
 use std::error;
 use std::fmt;
-use std::convert::From;
+use std::convert::{From, TryInto};
 
 use rustr::*;
 use rustson::*;
@@ -37,6 +37,8 @@ impl fmt::Display for RTsonError {
 }
 
 impl error::Error for RTsonError {
+    fn source(&self) -> Option<&(dyn error::Error + 'static)> { None }
+
     fn description(&self) -> &str {
         &self.description
     }
@@ -44,8 +46,6 @@ impl error::Error for RTsonError {
     fn cause(&self) -> Option<&dyn error::Error> {
         None
     }
-
-    fn source(&self) -> Option<&(dyn error::Error + 'static)> { None }
 }
 
 type RTsonResult<T> = std::result::Result<T, RTsonError>;
@@ -123,15 +123,8 @@ pub fn from_tson(rbytes: RawVec) -> RResult<SEXP> {
 }
 
 pub fn from_tson_reader(reader: &mut Cursor<&[u8]>) -> RResult<SEXP> {
-
-
     let deser = RTsonDeserializer::new();
      Ok(deser.read(reader)?)
-
-//    match decode(Cursor::new(&bytes)) {
-//        Ok(ref object) => value_to_r(object),
-//        Err(  e) => Err(RError::other(e)),
-//    }
 }
 
 
@@ -284,7 +277,7 @@ pub fn r_to_value(object: SEXP) -> RResult<Value> {
                     Ok(Value::STR(object_[0].clone()))
                 }
             } else {
-                Ok(Value::LSTSTR(object_))
+                Ok(Value::LSTSTR(object_.into()))
             }
         }
         _ => Err(RError::unknown(format!("bad object type : {}", object.rtype()).to_string()))
@@ -346,6 +339,8 @@ pub fn value_to_r(value: &Value) -> RResult<SEXP> {
         Value::LSTI64(ref v) => v.intor(),
         Value::LSTF32(ref v) => v.intor(),
         Value::LSTF64(ref v) => v.intor(),
-        Value::LSTSTR(ref v) => v.intor(),
+        Value::LSTSTR(ref v) => v.try_to_vec()
+            .map_err(|e| RError::unknown(e.to_string()))?.intor() ,
     }
 }
+
