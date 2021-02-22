@@ -6,8 +6,8 @@ version = "0.2.16"
 #rustr = "0.1"
 rustr = { git = "https://github.com/tercen/rustr", tag = "0.1.11" }
 #rustr = { path = "../rustr" }
-rustson = { git = "https://github.com/tercen/rustson", tag = "0.2.15" }
-#rustson = { path = "../rustson" }
+#rustson = { git = "https://github.com/tercen/rustson", tag = "0.2.15" }
+rustson = { path = "../rustson" }
 
 [lib]
 name = "rtsonlib"

@@ -1,7 +1,10 @@
-use super::*;
-
+// use super::*;
+use super::RTsonResult;
 pub use rustson::deser::Reader;
-use rustson::spec::STRING_TYPE;
+use rustson::spec::*;
+use rustr::{SEXP, IntoR, RawVec, RList, CharVec, R_NamesSymbol, ToSEXP, Rf_setAttrib, IntVec, NumVec};
+use ::{value_to_r, RTsonError};
+use rustson::VERSION;
 
 pub trait RDeserializer {
     fn read(&self, reader: &mut dyn Reader) -> RTsonResult<SEXP>;
@@ -87,11 +90,15 @@ impl RTsonDeserializer {
     }
 
     fn read_type(&self, reader: &mut dyn Reader) -> RTsonResult<u8> {
-        Ok(reader.read_u8()?)
+        let t = reader.read_u8()?;
+
+        Ok(t)
     }
 
     fn read_len(&self, reader: &mut dyn Reader) -> RTsonResult<usize> {
-        Ok(reader.read_u32()? as usize)
+        let len = reader.read_u32()? as usize;
+
+        Ok(len)
     }
 
     fn read_string(&self, reader: &mut dyn Reader) -> RTsonResult<String> {
